@@ -15,7 +15,7 @@ from tensorflow.python.keras.layers import Dense
 # df = pd.read_csv('./data/Car_Purchasing_Data_encode.csv')
 df = pd.read_csv('./data/Car_Purchasing_Data.csv', encoding='ISO-8859-1')
 
-sns.pairplot(df)
+# sns.pairplot(df)
 # plt.show() #for ploting outside JNB
 
 # drop some column (name mail country)
@@ -49,5 +49,28 @@ model.add(Dense(25,input_dim = 5, activation = 'relu'))
 model.add(Dense(25,activation = 'relu'))
 model.add(Dense(1, activation = 'linear'))
 
-print(model.summary())
+# print(model.summary())
+# Layer (type)                 Output Shape              Param #   
+# =================================================================
+# dense (Dense)                (None, 25)                150    (5x25 + 25 bias associated to each 25 weight)   
+# _________________________________________________________________
+# dense_1 (Dense)              (None, 25)                650    (25x25 + 25bias)   
+# _________________________________________________________________
+# dense_2 (Dense)              (None, 1)                 26     (25 nerons + 1bias)   
+# =================================================================
 
+model.compile(optimizer='adam', loss = 'mean_squared_error')
+epoch_hist = model.fit(X_train, y_train, epochs=100, batch_size = 25, verbose = 1, validation_split = 0.2)
+# evaluate the model
+plt.plot(epoch_hist.history['loss'])
+plt.plot(epoch_hist.history['val_loss'])
+plt.title('Model Progress')
+plt.ylabel('Training a validation loss')
+plt.xlabel('Epoch number')
+plt.legend(['Training loss', 'Validation loss'])
+plt.show()
+
+X_test = np.array([[1,50,5000,1000,60000]])
+y_predict = model.predict(X_test)
+
+print('Expected-->', y_predict)
