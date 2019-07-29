@@ -11,7 +11,7 @@ from tensorflow.python.keras.datasets import cifar10
 from tensorflow.python.keras.utils import to_categorical
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, AveragePooling2D, Dense, Flatten, Dropout
-from tensorflow.python.keras.optimizers import Adam
+from tensorflow.python.keras.optimizers import Adam, rmsprop
 from tensorflow.python.keras.callbacks import TensorBoard
 
 def show_img():
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     cnn_model.add(Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu', input_shape = input_shape)) #1rst conv layer
     cnn_model.add(Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu')) #2nd layer
     cnn_model.add(MaxPooling2D(2,2))
-    cnn.model.add(Dropout(0.3))
+    cnn_model.add(Dropout(0.3))
 
 
     cnn_model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #3rst conv layer
@@ -76,8 +76,12 @@ if __name__ == "__main__":
 
     cnn_model.add(Dense(units=10, activation = 'softmax')) #units in the output (10 classes) activation
 
-# relu = generating an output that is continus for regression
-# softmax = for classification (zeros or ones)
+    # relu = generating an output that is continus for regression
+    # softmax = for classification (zeros or ones)
+
+    cnn_model.compile(loss='categorical_crossentropy', optimizer = rmsprop(lr=0.001), metrics = ['accuracy'] )
+    hist = cnn_model.fit(X_train, y_train, batch_size = 32, epochs = 10, shuffle = True) #shuffle = changes the order 
+    # batch_size = how many images at once
 
 
 
