@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import confision_matrix
 
 
 from tensorflow.python.keras.datasets import cifar10
@@ -62,7 +63,6 @@ if __name__ == "__main__":
     cnn_model.add(MaxPooling2D(2,2))
     cnn_model.add(Dropout(0.3))
 
-
     cnn_model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #3rst conv layer
     cnn_model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #4nd layer
     cnn_model.add(MaxPooling2D(2,2)) #sample filter going to be 2 by 2
@@ -79,10 +79,26 @@ if __name__ == "__main__":
     # relu = generating an output that is continus for regression
     # softmax = for classification (zeros or ones)
 
-    cnn_model.compile(loss='categorical_crossentropy', optimizer = rmsprop(lr=0.001), metrics = ['accuracy'] )
-    hist = cnn_model.fit(X_train, y_train, batch_size = 32, epochs = 10, shuffle = True) #shuffle = changes the order 
+    cnn_model.compile(loss='categorical_crossentropy', optimizer = rmsprop(lr=0.001), metrics = ['accuracy'])
+    # rmsprop = root mean square error
+
+    hist = cnn_model.fit(X_train, y_train, batch_size = 32, epochs = 5, shuffle = True)
+    #shuffle = changes the order 
     # batch_size = how many images at once
+    
+    # Evaluate the model
+    eval = cnn_model.evaluate(X_test, y_test)
 
+    print('Test accuracy: {}'.format(eval[1]))
 
+    predict = cnn_model.predict_classes(X_test)
 
- 
+    # compare the prediction with the y_test
+    y_test = y_test.argmax(1)
+
+    # confision matrix
+    
+    cm = confusion_matrix (y_test, predicted_classes)
+    plt.figure(figsize = (10,10))
+    sns.heatmap()
+    
