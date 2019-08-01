@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import os
 
 
 from tensorflow.python.keras.datasets import cifar10
@@ -99,3 +100,12 @@ if __name__ == "__main__":
     plt.figure(figsize = (10,10))
     sns.heatmap(cm, annot = True)
     plt.show()
+
+    # saving the model
+    dir = os.path.join(os.getcwd(), 'saved_models')
+
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+    
+    model_path = os.path.join(dir, 'keras_cf10_trained.h5')
+    cnn_model.save(model_path)
