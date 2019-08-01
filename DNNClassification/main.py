@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confision_matrix
+from sklearn.metrics import confusion_matrix
 
 
 from tensorflow.python.keras.datasets import cifar10
@@ -37,18 +37,15 @@ def main():
 if __name__ == "__main__":
     
     (X_train, y_train), (X_test, y_test) = cifar10.load_data()
-    
-    
-    show_img()
-
+    # show_img()
     X_train = X_train.astype('float32')
-    X_train = X_train.astype('float32')
+    X_test = X_test.astype('float32')
 
     num_categ = 10
     norm_value = 255
 
     y_train = to_categorical(y_train, num_categ)
-
+    y_test = to_categorical(y_test, num_categ)
     # convert to values between 0 and 1
     X_train = X_train/norm_value
     X_test = X_test/norm_value
@@ -82,7 +79,7 @@ if __name__ == "__main__":
     cnn_model.compile(loss='categorical_crossentropy', optimizer = rmsprop(lr=0.001), metrics = ['accuracy'])
     # rmsprop = root mean square error
 
-    hist = cnn_model.fit(X_train, y_train, batch_size = 32, epochs = 5, shuffle = True)
+    hist = cnn_model.fit(X_train, y_train, batch_size = 32, epochs = 1, shuffle = True)
     #shuffle = changes the order 
     # batch_size = how many images at once
     
@@ -98,7 +95,7 @@ if __name__ == "__main__":
 
     # confision matrix
     
-    cm = confusion_matrix (y_test, predicted_classes)
+    cm = confusion_matrix (y_test, predict)
     plt.figure(figsize = (10,10))
-    sns.heatmap()
-    
+    sns.heatmap(cm, annot = True)
+    plt.show()
