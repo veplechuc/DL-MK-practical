@@ -15,6 +15,7 @@ from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, AveragePooling2D, Dense, Flatten, Dropout
 from tensorflow.python.keras.optimizers import Adam, rmsprop
 from tensorflow.python.keras.callbacks import TensorBoard
+from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 
 def show_img():
     W_grid = 4
@@ -33,9 +34,33 @@ def show_img():
     plt.show()
 
 def main():
-    pass    
+    augmentation()    
+
+def augmentation():
+    from tensorflow.python.keras.datasets import cifar10
+    (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+    X_train = X_train.astype('float32')
+    X_test = X_test.astype('float32')
+    from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
+
+    datagen_train = ImageDataGenerator(rotation_range=90)
+    datagen_train.fit(X_train)
+
+def saving_model(model):
+     # saving the model
+     dir = os.path.join(os.getcwd(), 'saved_models')
+
+     if not os.path.isdir(dir):
+         os.mkdir(dir)
+     
+     model_path = os.path.join(dir, 'keras_cf10_trained.h5')
+     model.save(model_path)
+
 
 if __name__ == "__main__":
+
+    # main()
+    # exit()
     
     (X_train, y_train), (X_test, y_test) = cifar10.load_data()
     # show_img()
@@ -101,11 +126,13 @@ if __name__ == "__main__":
     sns.heatmap(cm, annot = True)
     plt.show()
 
-    # saving the model
-    dir = os.path.join(os.getcwd(), 'saved_models')
+    # saving_model(cnn_model)
 
-    if not os.path.isdir(dir):
-        os.mkdir(dir)
-    
-    model_path = os.path.join(dir, 'keras_cf10_trained.h5')
-    cnn_model.save(model_path)
+    # augmentation, changing somthing from the dataset, lare, brightness, colors, etc
+    datagen = ImageDataGenerator(rotation_range = 90,
+                                with_shift_range = 0.1,
+                                horizontal_flip =True,
+                                vertical_flip =True)
+    datagen.fit(X_train)
+    cnn_model.fit_generator(datagen.flow(X_train, y_train,
+                            batch_size = 32), epochs = 3)
