@@ -46,15 +46,44 @@ def augmentation():
     datagen_train = ImageDataGenerator(rotation_range=90)
     datagen_train.fit(X_train)
 
-def saving_model(model):
+def saving_model(model, augmented=False):
      # saving the model
-     dir = os.path.join(os.getcwd(), 'saved_models')
+    dir = os.path.join(os.getcwd(), 'saved_models')
 
-     if not os.path.isdir(dir):
+    if not os.path.isdir(dir):
          os.mkdir(dir)
-     
-     model_path = os.path.join(dir, 'keras_cf10_trained.h5')
-     model.save(model_path)
+    
+    name = 'keras_cf10_trained_augmented.h5' if augmented else 'keras_cf10_trained.h5'
+    model_path = os.path.join(dir, name)
+    model.save(model_path)
+
+def model_definition():
+    model =  Sequential() #the to create the model
+    # now start adding layers
+    model.add(Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu', input_shape = input_shape)) #1rst conv layer
+    model.add(Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu')) #2nd layer
+    model.add(MaxPooling2D(2,2))
+    model.add(Dropout(0.3))
+
+    model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #3rst conv layer
+    model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #4nd layer
+    model.add(MaxPooling2D(2,2)) #sample filter going to be 2 by 2
+    model.add(Dropout(0.2))
+
+    model.add(Flatten())
+
+    model.add(Dense(units = 512, activation = 'relu')) #fully connected net
+    #here could add a dropout 
+    model.add(Dense(units = 512, activation = 'relu')) #fully connected net 
+
+    model.add(Dense(units=10, activation = 'softmax')) #units in the output (10 classes) activation
+
+    # relu = generating an output that is continus for regression
+    # softmax = for classification (zeros or ones)
+
+    model.compile(loss='categorical_crossentropy', optimizer = rmsprop(lr=0.001), metrics = ['accuracy'])
+
+    return model
 
 
 if __name__ == "__main__":
@@ -79,42 +108,19 @@ if __name__ == "__main__":
     input_shape = X_train.shape[1:]
 
     # print(input_shape)
-    cnn_model =  Sequential() #the to create the model
-    # now start adding layers
-    cnn_model.add(Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu', input_shape = input_shape)) #1rst conv layer
-    cnn_model.add(Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu')) #2nd layer
-    cnn_model.add(MaxPooling2D(2,2))
-    cnn_model.add(Dropout(0.3))
-
-    cnn_model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #3rst conv layer
-    cnn_model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu')) #4nd layer
-    cnn_model.add(MaxPooling2D(2,2)) #sample filter going to be 2 by 2
-    cnn_model.add(Dropout(0.2))
-
-    cnn_model.add(Flatten())
-
-    cnn_model.add(Dense(units = 512, activation = 'relu')) #fully connected net
-    #here could add a dropout 
-    cnn_model.add(Dense(units = 512, activation = 'relu')) #fully connected net 
-
-    cnn_model.add(Dense(units=10, activation = 'softmax')) #units in the output (10 classes) activation
-
-    # relu = generating an output that is continus for regression
-    # softmax = for classification (zeros or ones)
-
-    cnn_model.compile(loss='categorical_crossentropy', optimizer = rmsprop(lr=0.001), metrics = ['accuracy'])
+    model = model_definition()
     # rmsprop = root mean square error
 
-    hist = cnn_model.fit(X_train, y_train, batch_size = 32, epochs = 1, shuffle = True)
+    hist = model.fit(X_train, y_train, batch_size = 32, epochs = 1, shuffle = True)
     #shuffle = changes the order 
     # batch_size = how many images at once
     
     # Evaluate the model
-    eval = cnn_model.evaluate(X_test, y_test)
+    eval = model.evaluate(X_test, y_test)
 
     print('Test accuracy: {}'.format(eval[1]))
 
-    predict = cnn_model.predict_classes(X_test)
+    predict = model.predict_classes(X_test)
 
     # compare the prediction with the y_test
     y_test = y_test.argmax(1)
@@ -130,9 +136,15 @@ if __name__ == "__main__":
 
     # augmentation, changing somthing from the dataset, lare, brightness, colors, etc
     datagen = ImageDataGenerator(rotation_range = 90,
-                                with_shift_range = 0.1,
+                                width_shift_range = 0.1,
                                 horizontal_flip =True,
                                 vertical_flip =True)
     datagen.fit(X_train)
-    cnn_model.fit_generator(datagen.flow(X_train, y_train,
+    model.fit_generator(datagen.flow(X_train, y_train,
                             batch_size = 32), epochs = 3)
+
+    score = model.evaluate(X_test, y_test)
+
+    print('Test accuracy: {}'.format(score[1]))
+
+    saving_model(model, True)
