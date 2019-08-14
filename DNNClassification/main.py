@@ -85,6 +85,9 @@ def model_definition():
 
     return model
 
+def show_model_score(model, X_test, y_test):
+    score = model.evaluate(X_test, y_test)
+    print('Test accuracy: {}'.format(score[1]))
 
 if __name__ == "__main__":
 
@@ -116,17 +119,13 @@ if __name__ == "__main__":
     # batch_size = how many images at once
     
     # Evaluate the model
-    eval = model.evaluate(X_test, y_test)
-
-    print('Test accuracy: {}'.format(eval[1]))
-
+    show_model_score(model, X_test, y_test)
+    
     predict = model.predict_classes(X_test)
-
     # compare the prediction with the y_test
     y_test = y_test.argmax(1)
 
     # confision matrix
-    
     cm = confusion_matrix (y_test, predict)
     plt.figure(figsize = (10,10))
     sns.heatmap(cm, annot = True)
@@ -143,8 +142,7 @@ if __name__ == "__main__":
     model.fit_generator(datagen.flow(X_train, y_train,
                             batch_size = 32), epochs = 3)
 
-    score = model.evaluate(X_test, y_test)
 
-    print('Test accuracy: {}'.format(score[1]))
+    show_model_score(model)
 
     saving_model(model, True)
